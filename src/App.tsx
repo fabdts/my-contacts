@@ -1,13 +1,14 @@
-import React, { useCallback, useEffect, useReducer, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import useContacts from './hooks/useContacts';
+import { ContactsProvider } from './context/contacts';
 import { getContacts } from './api';
-import './App.css';
 import Contact from './components/Contact';
 import Loader from './components/Loader';
 import Error from './components/Error';
-import { initialState, reducer } from './reducers';
+import './App.css';
 
 function App() {
-  const [{ filteredContacts, loading, error }, dispatch] = useReducer(reducer, initialState)
+  const { state: { loading, error, filteredContacts }, dispatch } = useContacts();
   const [search, setSearch] = useState('');
   const [showMoreClicked, setShowMoreClicked] = useState(false);
   const handleClickShowMore = useCallback(async () => {
@@ -105,4 +106,10 @@ function App() {
   );
 }
 
-export default App;
+const MyContacts = () => (
+  <ContactsProvider>
+    <App />
+  </ContactsProvider>
+);
+
+export default MyContacts;
