@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer } from 'react';
+import React, { useCallback, useEffect, useReducer, useState } from 'react';
 import { getContacts } from './api';
 import './App.css';
 import Contact from './components/Contact';
@@ -8,6 +8,17 @@ import { initialState, reducer } from './reducers';
 
 function App() {
   const [{ filteredContacts, loading, error }, dispatch] = useReducer(reducer, initialState)
+  const [showMoreClicked, setShowMoreClicked] = useState(false);
+  const handleClickShowMore = useCallback(async () => {
+    dispatch({ type: 'FETCH_MORE_CONTACTS' });
+    try {
+      const payload = await getContacts(2);
+      dispatch({ type: 'FETCH_MORE_CONTACTS_SUCCESS', payload: payload.data });
+      setShowMoreClicked(true);
+    } catch (error: any) {
+      dispatch({ type: 'FETCH_MORE_CONTACTS_FAILURE', error });
+    }
+  }, [dispatch]);
 
   useEffect(() => {
     let didCancel = false;
@@ -64,13 +75,17 @@ function App() {
               <Contact key={contact.id} contact={contact} />
             ))}
           </ul>
-          <div className="mt-6 flex justify-center items-center">
-            <button
-              className="px-4 py-2 border border-gray-300 text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-            >
-              Show more
-            </button>
-          </div>
+          {(!showMoreClicked && !loading) ? (
+            <div className="mt-6 flex justify-center items-center">
+              <button
+                disabled={loading}
+                onClick={handleClickShowMore}
+                className="px-4 py-2 border border-gray-300 text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+              >
+                Show more
+              </button>
+            </div>
+          ) : null}
         </div>
         <div className="w-1/2 my-5 p-5">
           <h2 className="text-2xl">Favorites</h2>

@@ -4,6 +4,9 @@ export type AppActions =
   | { type: 'FETCH_CONTACTS' }
   | { type: 'FETCH_CONTACTS_SUCCESS', payload: IContact[] }
   | { type: 'FETCH_CONTACTS_FAILURE', error: string }
+  | { type: 'FETCH_MORE_CONTACTS' }
+  | { type: 'FETCH_MORE_CONTACTS_SUCCESS', payload: IContact[] }
+  | { type: 'FETCH_MORE_CONTACTS_FAILURE', error: string }
 
 export interface AppState {
   contacts: IContact[];
@@ -41,6 +44,28 @@ export function reducer(state: AppState = initialState, action: AppActions): App
         filteredContacts: [],
         error: action.error,
         loading: false,
+      };
+    case 'FETCH_MORE_CONTACTS':
+      return {
+        ...state,
+        loading: true,
+        error: null
+      };
+    case 'FETCH_MORE_CONTACTS_SUCCESS':
+      return {
+        ...state,
+        contacts: [...state.contacts, ...action.payload],
+        filteredContacts: [...state.filteredContacts, ...action.payload],
+        loading: false,
+        error: null
+      };
+    case 'FETCH_MORE_CONTACTS_FAILURE':
+      return {
+        ...state,
+        contacts: [],
+        filteredContacts: [],
+        error: action.error,
+        loading: false
       };
     default:
       return state;
