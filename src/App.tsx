@@ -1,16 +1,19 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import useContacts from './hooks/useContacts';
+import useLocalStorage from './hooks/useLocalStorage';
 import { ContactsProvider } from './context/contacts';
 import { getContacts } from './api';
 import Contact from './components/Contact';
 import Loader from './components/Loader';
 import Error from './components/Error';
 import './App.css';
+import { IContact } from './types';
 
 function App() {
   const { state: { loading, error, filteredContacts }, dispatch } = useContacts();
   const [search, setSearch] = useState('');
   const [showMoreClicked, setShowMoreClicked] = useState(false);
+  const [favorites, setFavorites] = useLocalStorage<IContact[]>('favorites', []);
   const handleClickShowMore = useCallback(async () => {
     dispatch({ type: 'FETCH_MORE_CONTACTS' });
     try {
@@ -48,8 +51,21 @@ function App() {
   }, [dispatch]);
 
   function handleSearch(e: React.ChangeEvent<HTMLInputElement>) {
+    // useDebounce?
     setSearch(e.target.value);
     dispatch({ type: 'CONTACTS_FILTERED', payload: { searchString: e.target.value } });
+  }
+
+  function handleFavorite(contact: IContact) {
+    if (!contact.favorite && !favorites.find((c) => c.id === contact.id)) {
+      setFavorites([...favorites, contact]);
+    } else {
+      setFavorites([...favorites.filter((c: IContact) => c.id !== contact.id)]);
+    }
+  }
+
+  function isFavorite(id: number) {
+    return favorites.some((c) => c.id === id);
   }
 
   return (
@@ -80,7 +96,7 @@ function App() {
           </div>
           <ul className="my-5 divide-y divide-gray-200 overflow-y-scroll h-[440px]">
             {filteredContacts.map((contact) => (
-              <Contact key={contact.id} contact={contact} />
+              <Contact key={contact.id} contact={contact} handleFavorite={handleFavorite} isFavorite={isFavorite(contact.id)} />
             ))}
           </ul>
           {(!showMoreClicked && !loading) ? (
@@ -98,7 +114,9 @@ function App() {
         <div className="w-1/2 my-5 p-5">
           <h2 className="text-2xl">Favorites</h2>
           <ul className="my-5 divide-y divide-gray-300 bg-gray-200 h-[440px] p-5">
-
+            {favorites.map((contact) => (
+              <Contact key={contact.id} contact={contact} handleFavorite={handleFavorite} isFavorite={isFavorite(contact.id)} />
+            ))}
           </ul>
         </div>
       </div>
