@@ -8,6 +8,7 @@ import { initialState, reducer } from './reducers';
 
 function App() {
   const [{ filteredContacts, loading, error }, dispatch] = useReducer(reducer, initialState)
+  const [search, setSearch] = useState('');
   const [showMoreClicked, setShowMoreClicked] = useState(false);
   const handleClickShowMore = useCallback(async () => {
     dispatch({ type: 'FETCH_MORE_CONTACTS' });
@@ -25,7 +26,6 @@ function App() {
     dispatch({ type: 'FETCH_CONTACTS' });
 
     async function fetchContacts() {
-      dispatch({ type: 'FETCH_CONTACTS' });
       try {
         if (!didCancel) {
           const payload = await getContacts(1);
@@ -46,6 +46,11 @@ function App() {
     };
   }, [dispatch]);
 
+  function handleSearch(e: React.ChangeEvent<HTMLInputElement>) {
+    setSearch(e.target.value);
+    dispatch({ type: 'CONTACTS_FILTERED', payload: { searchString: e.target.value } });
+  }
+
   return (
     <div className="mx-auto max-w-screen-lg p-10">
       <h1 className="text-5xl mb-5 font-bold">My contacts</h1>
@@ -54,6 +59,8 @@ function App() {
           <div className="flex flex-wrap -mx-5">
             <div className="my-5 px-5 w-3/4">
               <input
+                value={search}
+                onChange={handleSearch}
                 name="search"
                 className="w-full pl-5 pr-3 py-2 border border-gray-300 rounded-full leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-gray-900 focus:border-gray-900"
                 placeholder="Search"
