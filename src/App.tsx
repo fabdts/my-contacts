@@ -1,67 +1,40 @@
-import React from 'react';
+import React, { useEffect, useReducer } from 'react';
+import { getContacts } from './api';
 import './App.css';
 import Contact from './components/Contact';
-
-const contacts = [
-  {
-    first_name: 'Fab',
-    last_name: 'Dar',
-    email: 'fab.dar@mail.io',
-    id: 1,
-    avatar: '',
-    favorite: false,
-  },
-  {
-    first_name: 'Dar',
-    last_name: 'Fab',
-    email: 'dar.fab@mail.io',
-    id: 2,
-    avatar: '',
-    favorite: true
-  },
-  {
-    first_name: 'Dar',
-    last_name: 'Fab',
-    email: 'dar.fab@mail.io',
-    id: 3,
-    avatar: '',
-    favorite: true
-  },
-  {
-    first_name: 'Dar',
-    last_name: 'Fab',
-    email: 'dar.fab@mail.io',
-    id: 4,
-    avatar: '',
-    favorite: true
-  },
-  {
-    first_name: 'Dar',
-    last_name: 'Fab',
-    email: 'dar.fab@mail.io',
-    id: 5,
-    avatar: '',
-    favorite: true
-  },
-  {
-    first_name: 'Dar',
-    last_name: 'Fab',
-    email: 'dar.fab@mail.io',
-    id: 6,
-    avatar: '',
-    favorite: true
-  },
-  {
-    first_name: 'Dar',
-    last_name: 'Fab',
-    email: 'dar.fab@mail.io',
-    id: 7,
-    avatar: '',
-    favorite: true
-  },
-];
+import Loader from './components/Loader';
+import Error from './components/Error';
+import { initialState, reducer } from './reducers';
 
 function App() {
+  const [{ filteredContacts, loading, error }, dispatch] = useReducer(reducer, initialState)
+
+  useEffect(() => {
+    let didCancel = false;
+    dispatch({ type: 'FETCH_CONTACTS' });
+
+    async function fetchContacts() {
+      dispatch({ type: 'FETCH_CONTACTS' });
+      try {
+        if (!didCancel) {
+          const payload = await getContacts(1);
+          dispatch({ type: 'FETCH_CONTACTS_SUCCESS', payload: payload.data });
+        }
+      } catch (error: any) {
+        if (!didCancel) {
+          console.log(error);
+          dispatch({ type: 'FETCH_CONTACTS_FAILURE', error });
+        }
+      }
+    }
+
+    fetchContacts();
+
+    return () => {
+      didCancel = true;
+    };
+  }, [dispatch]);
+
   return (
     <div className="mx-auto max-w-screen-lg p-10">
       <h1 className="text-5xl mb-5 font-bold">My contacts</h1>
@@ -75,13 +48,19 @@ function App() {
                 placeholder="Search"
                 type="search"
               />
+              {loading && (
+                <Loader />
+              )}
+              {error && (
+                <Error />
+              )}
             </div>
             <div className="my-5 px-5 w-1/4">
-              <p>Total: </p>
+              <p>Total: {filteredContacts.length}</p>
             </div>
           </div>
           <ul className="my-5 divide-y divide-gray-200 overflow-y-scroll h-[440px]">
-            {contacts.map((contact) => (
+            {filteredContacts.map((contact) => (
               <Contact key={contact.id} contact={contact} />
             ))}
           </ul>

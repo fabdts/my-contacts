@@ -1,15 +1,9 @@
 import React from 'react';
+import { IContact } from '../types';
 import FavoriteButton from './FavoriteButton'
 
 type ContactProps = {
-  contact: {
-    id: number;
-    first_name: string;
-    last_name: string;
-    email: string;
-    avatar: string;
-    favorite: boolean;
-  }
+  contact: IContact,
 }
 
 const Contact = ({ contact }: ContactProps) => (

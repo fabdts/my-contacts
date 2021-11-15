@@ -1,7 +1,7 @@
 import React from 'react';
 
 type FavoriteButtonProps = {
-  isFavorite: boolean,
+  isFavorite: boolean | undefined,
   handleClick: () => void,
 }
 
