@@ -27,9 +27,9 @@ function App() {
 
   useEffect(() => {
     let didCancel = false;
-    dispatch({ type: 'FETCH_CONTACTS' });
 
     async function fetchContacts() {
+      dispatch({ type: 'FETCH_CONTACTS' });
       try {
         if (!didCancel) {
           const payload = await getContacts(1);
